@@ -1,0 +1,61 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "This is cloudformation template to try parameters",
+    "Parameters": {
+        "myKeyName": {
+            "Description": "Select the Key Value Pair",
+            "Type": "AWS::EC2::KeyPair::KeyName"
+        },
+        "azone": {
+            "Description":"select ur zone",
+            "Type":"AWS::EC2::AvailabilityZone::Name",
+            "Default" : "us-east-2a"
+        },
+        "imageid": {
+        "Description": "Select Your instance imageType",
+        "Type": "AWS::EC2::Image::Id"
+        },
+
+        "instanceType": {
+            "Description": "Select Your instance Type",
+            "Type": "String",
+            "Default": "t2.micro",
+            "AllowedValues": [
+                "t2.micro",
+                "t2.small",
+                "t2.nano"
+            ]
+        },
+        "securityGroupId": {
+            "Description": "Enter Security Group",
+            "Type": "AWS::EC2::SecurityGroup::Id"
+        }
+    },
+    "Resources": {
+        "myec2": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "KeyName": {
+                    "Ref": "myKeyName"
+                },
+                "ImageId": {
+                    "Ref": "imageid"
+                },
+                "InstanceType": {
+                    "Ref": "instanceType"
+                },
+                "SecurityGroupIds": [
+                    {
+                        "Ref": "securityGroupId"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Trying"
+                    }
+                ]
+            }
+        }
+    }
+}
