@@ -1,0 +1,53 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "This is cloudformation template to try parameters",
+    "Resources": {
+        "network": {
+            "Type": "AWS::EC2::VPC",
+            "Properties": {
+                "CidrBlock": "192.168.0.0/16"
+            }
+        },
+            
+            "igate": {
+              "Type": "AWS::EC2::InternetGateway",
+              "Properties": {
+                "Tags": [{"Key" : "name", "Value" : "ig"}]
+              }
+            
+            },
+            "AttachGateway": {
+                "Type": "AWS::EC2::VPCGatewayAttachment",
+                "Properties": {
+                    "VpcId": {
+                        "Ref": "network"
+                    },
+                    "InternetGatewayId": {
+                        "Ref": "igate"
+                    }
+                }
+            },
+            "routeTable": {
+                "Type": "AWS::EC2::RouteTable",
+                "Properties": {
+                    "VpcId": {
+                        "Ref": "network"
+                    }
+                }
+            },
+            "route": {
+                "Type": "AWS::EC2::Route",
+                "Properties": {
+                    "RouteTableId": {
+                        "Ref": "routeTable"
+                    },
+                    "DestinationCidrBlock": "0.0.0.0/0",
+                    "GatewayId": {
+                        "Ref": "igate"
+                    }
+                }
+            }
+        }
+    }
+
+
