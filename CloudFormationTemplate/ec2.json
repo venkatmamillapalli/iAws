@@ -8,46 +8,109 @@
                 "CidrBlock": "192.168.0.0/16"
             }
         },
-            
-            "igate": {
-              "Type": "AWS::EC2::InternetGateway",
-              "Properties": {
-                "Tags": [{"Key" : "name", "Value" : "ig"}]
-              }
-            
-            },
-            "AttachGateway": {
-                "Type": "AWS::EC2::VPCGatewayAttachment",
-                "Properties": {
-                    "VpcId": {
-                        "Ref": "network"
-                    },
-                    "InternetGatewayId": {
-                        "Ref": "igate"
+        "igate3": {
+            "Type": "AWS::EC2::InternetGateway",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "name",
+                        "Value": "igate3"
                     }
+                ]
+            }
+        },
+        "AttachGateway": {
+            "Type": "AWS::EC2::VPCGatewayAttachment",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "network"
+                },
+                "InternetGatewayId": {
+                    "Ref": "igate3"
                 }
-            },
-            "routeTable": {
-                "Type": "AWS::EC2::RouteTable",
-                "Properties": {
-                    "VpcId": {
-                        "Ref": "network"
-                    }
+            }
+        },
+        "routeTable": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "network"
                 }
-            },
-            "route": {
-                "Type": "AWS::EC2::Route",
-                "Properties": {
-                    "RouteTableId": {
-                        "Ref": "routeTable"
-                    },
-                    "DestinationCidrBlock": "0.0.0.0/0",
-                    "GatewayId": {
-                        "Ref": "igate"
+            }
+        },
+        "route": {
+            "Type": "AWS::EC2::Route",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "routeTable"
+                },
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "GatewayId": {
+                    "Ref": "igate3"
+                }
+            }
+        },
+        "public": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "AvailabilityZone": "us-east-2a",
+                "VpcId": {
+                    "Ref": "network"
+                },
+                "CidrBlock": "192.168.0.0/24"
+            }
+        },
+        "routeTableAssocName": {
+          "Type": "AWS::EC2::SubnetRouteTableAssociation",
+          "Properties": {
+            "SubnetId": { "Ref": "public"},
+            "RouteTableId": {"Ref":"routeTable"}
+          }
+        },
+        
+        "secgroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "securitygrop",
+                "SecurityGroupIngress": [
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "IpProtocol": "-1"
                     }
+                ],
+                "VpcId": {
+                    "Ref": "network"
+                }
+            }
+        },
+        "ec2": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "KeyName": "lazy",
+                "ImageId": "ami-0986c2ac728528ac2",
+                "InstanceType": "t2.micro",
+                "Monitoring": "false",
+                "NetworkInterfaces": [ {
+                    "AssociatePublicIpAddress": "true",
+                    "DeviceIndex": "0",
+                    "GroupSet": [{ "Ref" : "secgroup" }],
+                    "SubnetId": { "Ref" : "public" }
+                  } ],
+            "UserData": {
+                "Fn::Base64": {
+                    "Fn::Join": [
+                        "/n",
+                        [
+                            "#!/bin/bash",
+                            "sudo apt update",
+                            "sudo apt-get install apache2 -y",
+                            "sudo systemctl start apache2"
+                        ]
+                    ]
                 }
             }
         }
     }
 
-
+}
+}
